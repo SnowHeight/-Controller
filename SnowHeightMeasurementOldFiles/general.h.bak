@@ -1,0 +1,16 @@
+/*
+ * general.h
+ *
+ * Created: 21.03.2017 16:03:18
+ *  Author: ARTHUR
+ */ 
+
+
+#ifndef GENERAL_H_
+#define GENERAL_H_
+
+#define F_CPU	16000000UL
+
+
+
+#endif /* GENERAL_H_ */
