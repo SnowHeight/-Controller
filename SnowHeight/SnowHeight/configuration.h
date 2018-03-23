@@ -50,7 +50,7 @@
 // ultrasonic measuring sensor
 #define USONIC_PORT					PORTD
 #define USONIC_PIN					PIND
-#define USONIC_Dir					DDRD
+#define USONIC_DIR					DDRD
 #define USONIC_ECHO_PIN				PD3
 #define USONIC_TRIGGER_PIN			PD7
 #define USONIC_ECHO_ISR				INT3_vect
@@ -65,7 +65,7 @@
 #define USONIC_TCNT					TCNT5
 #define USONIC_OVF_ISR				TIMER5_OVF_vect
 #define USONIC_PRESCALER1()			(TCCR5B |= (1 << CS50))
-#define USONIC_PRESCALER10()		(TCCR5B &= ~((1 << CS50) | (1 << CS51) | (1 << CS52)))
+#define USONIC_PRESCALER0()			(TCCR5B &= ~((1 << CS50) | (1 << CS51) | (1 << CS52)))
 #define USONIC_OCRA_ISR				TIMER5_COMPA_vect
 // 16bit max unsigned int value
 #define UINT16_MAX					65536
