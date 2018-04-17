@@ -2,6 +2,7 @@
  * Interface for using the ultrasonic sensor
  *
  * \author cmellauner, mplankensteiner
+ *	\Edit bbruestle
  * \version 1.0
  * \date 2017
  */
@@ -34,6 +35,8 @@ usonic::usonic() :
 	
 }
 
+
+//sort distance array
 void usonic::bubbleSort(uint16_t (&distanceArray)[10])
 {
 	bool bSorted = false;
@@ -58,7 +61,6 @@ uint16_t usonic::getAverageDistance()
 {	
 	USONIC_TIMSK |= (1 << USONIC_OCRA);
 	
-	//Take 10 measurements and save them into an Array
 	uint16_t measureDistances[10];
 	for (uint8_t i = 0; i < 10; i++)
 	{			
@@ -72,6 +74,8 @@ uint16_t usonic::getAverageDistance()
 	}
 	USONIC_TIMSK &= ~(1 << USONIC_OCRA);
 	
+	
+	//Test output Usart
 	for (uint8_t i = 0; i < 10; i++)
 	{
 		usart.Transmit("|start Mesurment|=>");
@@ -81,6 +85,7 @@ uint16_t usonic::getAverageDistance()
 	//Sort the Values
 	bubbleSort(measureDistances);
 	
+	//Test output Usart
 		for (uint8_t i = 0; i < 10; i++)
 		{
 			usart.Transmit("|bubbleosrt|=>");
@@ -102,6 +107,7 @@ uint16_t usonic::getAverageDistance()
 			break;
 		}
 	}
+	//Test output Usart
 	usart.Transmit("|Compare|=>");
 	usart.Transmit((long)compareValue);
 	
@@ -111,6 +117,7 @@ uint16_t usonic::getAverageDistance()
 	usart.Transmit("|high|=>");	
 	usart.Transmit(highIndex);
 	
+	//Test output Usart
 	for (uint8_t i = lowIndex; i < highIndex; i++)
 	{
 		usart.Transmit("|mesureD|==>");

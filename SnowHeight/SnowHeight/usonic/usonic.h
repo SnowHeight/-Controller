@@ -12,26 +12,6 @@
 #include <avr/interrupt.h>
 #include "../general.h"
 #include "../configuration.h"
-//#define usonicPort			PORTD
-//#define usonicPIN			PIND
-//#define usonicDir			DDRD
-//#define usonicEchoPin		PD3
-//#define usonicTriggerPin	PD7
-//#define usonicEchoISR		INT3_vect
-//#define usonicEchoEICR		EICRA
-//#define usonicInterrupt		ISC30
-//#define usonicEchoINT		INT3	
-//
-//#define usonicTimsk			TIMSK5
-//#define usonicTOVF			TOIE5	
-//#define usonicOCRA			OCIE5A
-//#define usonicTriggerImpuls	OCR5A
-//#define usonicTCNT			TCNT5	
-//#define usonicOVF_ISR		TIMER5_OVF_vect
-//#define usonicPrescaler1()	(TCCR5B |= (1 << CS50))
-//#define usonicPrescaler0()	(TCCR5B &= ~((1 << CS50) | (1 << CS51) | (1 << CS52)))
-//#define usonicOCRA_ISR		TIMER5_COMPA_vect
-//#define uint16max			65536
 
 class usonic
 {
