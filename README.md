@@ -1,5 +1,25 @@
 # Controller
 
+## Allgemeines
+
+Die gesamte Hardware dieses Projekts wird über einen ATMEGA 2560 gesteuert.
+
+Die angeschlossenen Messgeräte sind:
+- DS3231 (RTC) (Um den Microcontroller zu wecken)
+- Ultraschall Sensor (Zur messung der Schneehöhe)
+- Schnee-Flächen-Messung
+  - 2x Servo Motor (zur Vertikalen und Horizontalen bewegung)
+  - Lasermessgerät (zur Schneehöhenmessung)
+- Wettermessgerät (zur Messung von Temperatur, Luftfeuchtigkeit und Luftdruck)
+- Bluetoothmodul (zur Kommunikation zwischen Microcontroller und der Handy-App)
+- SDCardreader (zur Speicherung der gemossenen Daten)
+
+Zubehör:
+- Solarzellen
+- Bleiakku
+- Micro-SDCard
+
+
 ## ATMEAG 2560
 
 <img src="https://www.exp-tech.de/media/image/10/64/e3/xARDUINO-Mega-Pinout-Diagram.png.pagespeed.ic.c8O2buxrE8.webp" alt="Image not found">geklaut von <a href="https://www.exp-tech.de/blog/arduino-mega-2560-pinbelegung">dieser Website</a></img>
@@ -24,7 +44,7 @@ Die gespeicherte Zeit beinhaltet:
 - Monat
 - Jahr
 
-Außerdem besitz die Uhr 2 unabhängig voneinander setzbare Alarms.
+Außerdem besitzt die Uhr 2 unabhängig voneinander setzbare Alarms.
 
 Das setzen und auslesen von Uhrzeiten und Alarms passiert über I2C, welches auf ein Register auf der RTC zugreifft (dokumentation befindet sich im Datenblatt auf Seite 11).
 
