@@ -57,3 +57,18 @@ Pins der RTC:
 - 32K
 
 <a href="https://datasheets.maximintegrated.com/en/ds/DS3231.pdf">DS3132 Datenblatt</a>
+
+
+## BME280 (Wettersensor)
+
+Dieser Sensor wird zur Messung von Temperatur, Druck und Luftfeuchtigkeit verwendet.
+
+Hier werden 2 dieser Sensoren verwendet, wobei einer der zwei, außerhald der Hülle und einer innerhalb misst.
+
+Die Kommunikation mit dem Microcontroller passiert über I2C.
+
+Die hier verwendeten I2C Adressen sind:
+- 0x76
+- 0x77
+
+<a href="https://www.mouser.com/datasheet/2/783/BST-BME280-DS002-1509607.pdf">BME280 Datenblatt</a>
