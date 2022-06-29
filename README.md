@@ -72,3 +72,24 @@ Die hier verwendeten I2C Adressen sind:
 - 0x77
 
 <a href="https://www.mouser.com/datasheet/2/783/BST-BME280-DS002-1509607.pdf">BME280 Datenblatt</a>
+
+
+## MG996R TowardPro (Servomotor 1)
+
+Dieser Servo dient dem Laser zur Einstellung der Horizontalen Winkel.
+
+Die Kommunikation findet über ein PWM-Signal mit dem Mikrocontroller statt.
+-Servo1PWMOut	PB5 (Pin 11)
+
+<a href="https://www.electronicoscaldas.com/datasheet/MG996R_Tower-Pro.pdf">MG996R TowardPro Datenblatt</a>
+
+
+## MG996R TowardPro (Servomotor 2)
+
+Dieser Servo dient dem Laser zur Einstellung der Vertikalen Winkel.
+
+Die Kommunikation findet über ein PWM-Signal mit dem Mikrocontroller statt.
+-Servo2PWMOut	PB6 (Pin 12)
+
+<a href="https://www.conrad.com/p/modelcraft-standard-servo-rs2-mgbb-analogue-servo-gear-box-material-metal-connector-system-jr-205111">Modelcraft RS2 MG/BB Datenblatt</a>
+<a href="https://servodatabase.com/servo/modelcraft/rs-2">Modelcraft RS2 MG/BB Datenblatt 2</a>
