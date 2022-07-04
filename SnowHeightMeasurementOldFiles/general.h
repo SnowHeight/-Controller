@@ -67,8 +67,11 @@
 #define ServoCutoff					PH4					//Pin PH4 (Pin 7)
 #define ModuleCutoff				PH3					//Pin PH3 (Pin 6)
 
+// ADC
 #define maxCurrentADC				40					//max. ADC-Value (~100 mA)
 #define maxBatteryValue				13672				//(14 / 1024) * 1000 000
 #define Mask						0b1111111111111000	//Bit-Mask (16 Bit)
+
+
 
 #endif /* GENERAL_H_ */

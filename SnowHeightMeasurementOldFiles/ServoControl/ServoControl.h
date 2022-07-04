@@ -25,4 +25,4 @@ class ServoControl {
 	private:
 		uint16_t m_angle1, m_angle2;
 		
-};
+}; extern ServoControl servoControl;

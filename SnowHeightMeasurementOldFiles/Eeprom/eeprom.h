@@ -36,8 +36,8 @@ class EEPROM
 			bool bWatchdog;		
 			//Value for the power save voltage, Value = voltage * 10 
 			uint8_t nPowerSaveVoltage;	
-			//Value for the power save voltage, Value = voltage * 10
-			uint8_t nCountLasermeasurements;
+			//Count of Laser mearurements
+			uint16_t nCountLasermeasurements;
 		} m_oParameters;
 		//Array for the lasermeasurement matrix
 
@@ -54,9 +54,10 @@ class EEPROM
 		void SetValueX(uint16_t ValueX);
 		void SetValueY(uint16_t ValueY);
 		bool GotoNextValue();
+		uint16_t nCurrentLasercount = 0;
 	private:
 		uint16_t iValueregister;
-		uint16_t nCurrentLasercount = 0;
+		
 };
 
 #ifndef EEPROM_H_

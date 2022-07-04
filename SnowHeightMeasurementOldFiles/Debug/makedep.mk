@@ -26,6 +26,8 @@ servocontrol\Servo.cpp
 
 servocontrol\ServoControl.cpp
 
+usart\myUart.cpp
+
 usonic\usonic.cpp
 
 weathersensor\WeatherSensor.cpp

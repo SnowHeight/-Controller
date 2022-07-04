@@ -86,6 +86,8 @@ void EEPROM::SetValueY(uint16_t ValueY)
 
 bool EEPROM::GotoFirstValue()
 {
+	nCurrentLasercount = 0; //zero zero
+	
 	iValueregister = EEPROM_MatrixStart;
 	return true;
 }
@@ -109,7 +111,7 @@ bool EEPROM::GotoNextValue()
 	nCurrentLasercount++;
 	// AF - Plus 2 da wir zwei register weiter müssen(16 bit).
 	iValueregister += 2;
-	if (nCurrentLasercount >= m_oParameters.nCountLasermeasurements)
+	if (nCurrentLasercount >= m_oParameters.nCountLasermeasurements) // schreib 300
 	{
 		nCurrentLasercount = 0;
 		return false;

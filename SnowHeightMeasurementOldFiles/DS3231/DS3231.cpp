@@ -208,18 +208,30 @@ uint8_t DS3231::DS3231_setalarm(uint8_t minutes) {
 			day += 1;					//can be extended at this point
 		}
 	}
-	second = 0;							//set seconds to 0 
+	//second = 0;							//set seconds to 0 
 	//write date
 	i2c_start(DS3231_ADDR + I2C_WRITE);
-	i2c_write(0x07);					//stop oscillator
+	i2c_write(0x07);				//stop oscillator
 	//Alarm
 	i2c_write(DS3231_dec2bcd(second));	//Seconds 
 	i2c_write(DS3231_dec2bcd(minute));	//Minutes 
 	i2c_write(DS3231_dec2bcd(hour));	//Hour
 	i2c_write(0b10000000);				//Day/Date
-	//i2c_write(0x07);					//start oscillator
 	i2c_stop();
+	
+	//i2c_start(DS3231_ADDR + I2C_WRITE);
+	//i2c_write(0x0E); 
+	//i2c_stop();
+	//i2c_start(DS3231_ADDR + I2C_READ);                   
+	//uint8_t regE = i2c_read_nack();
+	//i2c_stop();
+	//
+	//i2c_start(DS3231_ADDR + I2C_WRITE);
+	//i2c_write(0x0E);
+	//i2c_write(regE | 0b00000001);
+	//i2c_stop();
 	return 1;
+
 }
 /*
  * get alarm 1
@@ -284,22 +296,34 @@ void DS3231::DS3231_getalarm(uint8_t &hour, uint8_t &minute, uint8_t &second) {
 	 }
  }
   void DS3231::DS3231_clearalarmflag() {
-	  uint8_t alarm = 0;
-	  //Read bits from control register 0Eh
+	  //uint8_t alarm = 0;
+	  ////Read bits from control register 0Eh
+	  //i2c_start(DS3231_ADDR + I2C_WRITE);
+	  //i2c_write(0x0F);									//stop oscillator
+	  //i2c_stop();
+	  //i2c_start(DS3231_ADDR + I2C_READ);				//| I2C_READ);
+	  //alarm = i2c_read_nack();
+	  //i2c_stop();
+	  //i2c_start(DS3231_ADDR + I2C_WRITE);
+	  //i2c_write(0x0F);									//stop oscillator
+	  //i2c_write(alarm &= ~(1 << DS3231_Alarm1Flag));
+	  //i2c_write(0x0F);									//start oscillator
+	  //i2c_stop();
+	  
 	  i2c_start(DS3231_ADDR + I2C_WRITE);
-	  i2c_write(0x0F);									//stop oscillator
+	  i2c_write(0x0F);
 	  i2c_stop();
-	  i2c_start(DS3231_ADDR + I2C_READ);				//| I2C_READ);
-	  alarm = i2c_read_nack();
+	  i2c_start(DS3231_ADDR + I2C_READ);
+	  uint8_t regF = i2c_read_nack();
 	  i2c_stop();
+	  
 	  i2c_start(DS3231_ADDR + I2C_WRITE);
-	  i2c_write(0x0F);									//stop oscillator
-	  i2c_write(alarm &= ~(1 << DS3231_Alarm1Flag));
-	  i2c_write(0x0F);									//start oscillator
+	  i2c_write(0x0F);
+	  i2c_write(regF & ~0b00000011);
 	  i2c_stop();
   }
 
-  char* DS3231::DS3231_getdatetimenow()
+  uint8_t* DS3231::DS3231_getdatetimenow()
   {
   //AF - Return the RTC Date as string
 	  uint8_t year = 0;
@@ -309,20 +333,32 @@ void DS3231::DS3231_getalarm(uint8_t &hour, uint8_t &minute, uint8_t &second) {
 	  uint8_t minute = 0;
 	  uint8_t second = 0;
 	  rtc.DS3231_getdate(year, month, day, hour, minute, second);
-	  char Currenttime[50];
+	  uint8_t Currenttime[50];
 
-	  Currenttime[0] = (char)day;
+	  Currenttime[0] = day;
 	  Currenttime[1] = '.';
-	  Currenttime[2] = (char)month;
+	  Currenttime[2] = month;
 	  Currenttime[3] = '.';
-	  Currenttime[4] = (char)year;
+	  Currenttime[4] = year;
 	  Currenttime[5] = ' ';
-	  Currenttime[6] = (char)hour;
+	  Currenttime[6] = hour;
 	  Currenttime[7] = ':';
-	  Currenttime[8] = (char)minute;
+	  Currenttime[8] = minute;
 	  Currenttime[9] = ':';
-	  Currenttime[10] = (char)second;
+	  Currenttime[10] = second;
 
 	  //sprintf(Currenttime,"%d.%d.%d %d:%d:%d", year, month, day, hour, minute, second);
 	  return Currenttime;
+  }
+  
+  void DS3231::GetEFRegister(uint8_t &regE, uint8_t &regF)
+  {
+	  i2c_start(DS3231_ADDR + I2C_WRITE);
+	  i2c_write(0x0E);
+	  i2c_stop();
+	  
+	  i2c_start(DS3231_ADDR + I2C_READ);
+	  regE = i2c_read_ack();
+	  regF = i2c_read_nack();
+	  i2c_stop();
   }

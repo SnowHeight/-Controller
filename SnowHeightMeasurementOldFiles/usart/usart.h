@@ -5,11 +5,13 @@
  *  Author: gert
  */ 
 
-
+#define F_CPU 16000000UL
 #include <avr\interrupt.h>
+
 
 #ifndef USART_H_
 #define USART_H_
+//#include <stdlib.h>
 
 #define USART_BAUDRATE 115200
 #define BAUD_PRESCALE  8
@@ -31,15 +33,15 @@ ISR(USART0_RX_vect)
 
 void USART_Init(void){
    // Set baud rate
-   UBRR0H = (BAUD_PRESCALE >> 8);    
-   UBRR0L = BAUD_PRESCALE;// Load lower 8-bits into the low byte of the UBRR register
-
+   //UBRR0H = (BAUD_PRESCALE >> 8);    
+   //UBRR0L = BAUD_PRESCALE;// Load lower 8-bits into the low byte of the UBRR register
+	UBRR0 = 8;
 	 /* Load upper 8-bits into the high byte of the UBRR register
     Default frame format is 8 data bits, no parity, 1 stop bit
   to change use UCSRC, see AVR datasheet*/ 
-
+	UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00);
   // Enable receiver and transmitter and receive complete interrupt 
-  UCSR0B = ((1<<TXEN0)|(1<<RXEN0) | (1<<RXCIE0));
+  UCSR0B |= ((1<<TXEN0)|(1<<RXEN0) | (1<<RXCIE0));
 }
 
 
@@ -76,29 +78,11 @@ uint8_t USART_ReceiveByte(){
 
 void USART_sendInteger(long zahl, uint8_t usartControl = 0)
 {
-	long restzahl = zahl;
-	int8_t rest = 0;
-	char strZahl[11];
-	uint8_t stelle = 0;
-	
-	
-	if(restzahl<0)	{
-		strZahl[stelle] = '-';
-		stelle++;
-	}
-	
-	while(restzahl != 0){
-		rest = restzahl % 10;
-		restzahl /= 10;
-		strZahl[stelle] = (rest + 48);
-		stelle++;
-	}
-	
-	for (int i = stelle-1; i >= 0; i--)	{
-		USART_SendByte(strZahl[i]);
-	}
-	if(usartControl)
-		USART_SendByte(usartControl);
+
+	char strZahl[11];	
+
+	ltoa(zahl, strZahl, 10);
+	USART_sendBytes(strZahl);
 	
 }
 

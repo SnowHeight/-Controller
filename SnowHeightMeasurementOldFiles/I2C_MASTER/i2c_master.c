@@ -70,7 +70,6 @@ uint8_t i2c_read_ack(void)
 
 uint8_t i2c_read_nack(void)
 {
-	
 	// start receiving without acknowledging reception
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	// wait for end of transmission

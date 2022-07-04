@@ -8,6 +8,7 @@
 #define F_CPU 16000000UL
 #include <util/delay.h>
 #include "ServoControl.h"
+#include "Servo.h"
 
 ServoControl::ServoControl() 
 {
@@ -28,7 +29,7 @@ void ServoControl::setAngle(uint16_t angle1, uint16_t angle2)
 
 		ICR1=39999;  //fPWM=50Hz (Period = 20ms Standard).
 
-		DDRD|=(1<<PD4)|(1<<PD5);   //PWM Pins as Out	
+		DDRD|=(1<<PD4)|(1<<PD5);   //PWM Pins as Out
 }
 
 

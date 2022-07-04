@@ -34,7 +34,8 @@ public:
 	void DS3231_enablealarm();
 	void DS3231_disablealarm();
 	void DS3231_clearalarmflag();
-	char* DS3231_getdatetimenow();
+	void GetEFRegister(uint8_t &regE, uint8_t &regF);
+	uint8_t* DS3231_getdatetimenow();
 protected:
 private:
 	DS3231( const DS3231 &c );

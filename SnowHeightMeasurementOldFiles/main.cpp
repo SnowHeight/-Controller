@@ -4,6 +4,7 @@
  * Created: 13.03.2017 16:10:54
  * Author : arfuetsch
  */
+#include "general.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdlib.h>
@@ -12,7 +13,7 @@
 #include <string.h>
 #include <avr/wdt.h>
 
-#include "general.h"
+
 #include "I2C_MASTER/i2c_master.h"
 #include "Eeprom/eeprom.h"
 #include "DS3231/DS3231.h"
@@ -21,15 +22,18 @@
 #include "SDCard/sdcard.h"
 #include "weathersensor/WeatherSensor.h"
 #include "ServoControl/Servo.h"
+#include "usart/myUart.h"
 
 bool bLaserError = false;
 uint8_t iOldLasercycle = 0;
+uint8_t counter = 0;
 
 void AddEEPROMTestData(){
 	//AF - Zum Testen während Übertragungsmodule fehlen.
 	EEPROM oEeprom;
+	//oEeprom.clearEeprom();
 	oEeprom.m_oParameters.nCountLasermeasurements = 300;
-	oEeprom.m_oParameters.nHeight = 500;
+	oEeprom.m_oParameters.nHeight = 900;
 	oEeprom.m_oParameters.nPowerSaveVoltage = 230;
 	oEeprom.m_oParameters.nServoDrivingTime = 500;
 	oEeprom.m_oParameters.nUltraSonicDelay = 10;
@@ -64,14 +68,9 @@ void AddEEPROMTestData(){
 				}
 			} 
 		}	
-		if (bRight == true)
-		{
-			bRight = false;
-		}
-		else
-		{
-			bRight = true;
-		}
+
+		bRight = !bRight;
+		
 		if (iTestValueY < 1350)
 		{
 			iTestValueY += 60;
@@ -79,7 +78,7 @@ void AddEEPROMTestData(){
 	}
 	bool bWrite = oEeprom.GotoFirstValue();
 	uint16_t iWriteCounter = 0;
-	if (bWrite)
+	while (bWrite)
 	{
 		oEeprom.SetValueX(iLaserValues[iWriteCounter][0]);
 		oEeprom.SetValueY(iLaserValues[iWriteCounter][1]);
@@ -167,6 +166,7 @@ uint8_t GetFailureCycle(uint8_t alarmcycle)
 	return cycle;
 }
 
+// Hier jede Klasse einzeln Testen und die anderen derweil auskommentieren
 void Measurementcycle(uint8_t alarmcycle, uint8_t &counterlasercycle){
 	rtc.DS3231_Alarmcounter += 1;
 	//AF - Clear Alarmflag;
@@ -263,12 +263,228 @@ void Measurementcycle(uint8_t alarmcycle, uint8_t &counterlasercycle){
 
 int main(void)
 {	
+	
 	//MAIN PROGRAMM
-	USART_Init();
 	sei();
+	
+	uartSettings settings = uartSettings();
+	
+	myUart uart = myUart(settings);
+	
+	uart.enable();
+	
+	
+	//AF - Zum Testen während Übertragungsmodule fehlen.
 	EEPROM oEeprom;
-	////AF - Add testdata
-	void AddEEPROMTestData();
+	oEeprom.clearEeprom();
+	oEeprom.m_oParameters.nCountLasermeasurements = 300;
+	oEeprom.m_oParameters.nHeight = 900; 
+	oEeprom.m_oParameters.nPowerSaveVoltage = 230;
+	oEeprom.m_oParameters.nServoDrivingTime = 500;
+	oEeprom.m_oParameters.nUltraSonicDelay = 10;
+	oEeprom.m_oParameters.nLaserDelay = 6;
+	oEeprom.WriteToEeprom();
+	uint16_t iLaserValues[oEeprom.m_oParameters.nCountLasermeasurements][2];
+
+	uint16_t iTestValueX = 450; // 450
+	uint16_t iTestValueY = 450;
+	bool bRight = true;
+	uint16_t iCounter = 0;
+	//AF - Test mit Lasermatrix 300 = 20 * 15
+	
+	for(uint16_t iYCounter = 0; iYCounter < 15; iYCounter++)
+	{
+		for(uint16_t iXCounter = 0; iXCounter < 20; iXCounter++)
+		{
+			iLaserValues[iCounter][0] = iTestValueX;
+			iLaserValues[iCounter][1] = iTestValueY;
+			iCounter++;
+			
+			if (bRight == true)
+			{
+				if (iTestValueX < 1350)
+				{
+					iTestValueX = 45 + iTestValueX;
+				}
+			}
+			else
+			{
+				if (iTestValueX > 450)
+				{
+					iTestValueX -= 45;
+				}
+			}
+		}
+
+		bRight = !bRight;
+		
+		if (iTestValueY < 1350)
+		{
+			iTestValueY += 60;
+		}
+	}
+	
+	bool bWrite = oEeprom.GotoFirstValue();
+	oEeprom.m_oParameters.nCountLasermeasurements = 300;
+	oEeprom.nCurrentLasercount = 0;
+	uint16_t iWriteCounter = 0;
+	while (bWrite)
+	{
+		oEeprom.SetValueX(iLaserValues[iWriteCounter][0]);
+		oEeprom.SetValueY(iLaserValues[iWriteCounter][1]);
+		bWrite = oEeprom.GotoNextValue();
+		iWriteCounter++;
+		
+	}
+	
+	servo.LaserMeasure();
+	
+	// test
+	
+	//USART_sendInteger(servo.LaserMeasure());
+	
+
+	
+	
+	//AddEEPROMTestData();
+
+
+	//wdt_reset();
+	//Laser Fehlerstatus auslesen.
+	
+	
+	
+	//bool bServoSuccess = servo.LaserMeasure();
+	
+	//if(bServoSuccess)
+	//{
+		//USART_sendBytes("Funkt");
+	//}
+	//else
+	//{
+		//USART_sendBytes("Funkt ned");
+	//}
+	
+	
+	
+	
+	//USART_sendInteger(oEeprom.m_oParameters.nHeight);
+
+	
+	//USART_sendInteger(oEeprom.m_oParameters.nCountLasermeasurements);
+	
+	//bool bDatastream = oEeprom.GotoFirstValue();
+//
+	//while(bDatastream)
+	//{
+		//USART_sendInteger(oEeprom.GetValueX());
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//USART_sendInteger(oEeprom.GetValueY());
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//bDatastream = oEeprom.GotoNextValue();
+//
+	//}
+	
+
+
+	//USART_sendBytes("TestTest: ");
+//
+	////AF - start weather measurement
+	//WeatherSensor oWeathersensor(WeatherAddress);
+	//
+	////AF - Sensor1 Pressure
+	//int16_t nPress1 = oWeathersensor.getPressureS1();
+//
+	////AF - Sensor1 Temperature
+	//int32_t nTemp1 = oWeathersensor.getTemperatureS1();
+	//
+	////AF - Sensor1 Humidity
+	//uint32_t nHum1 = oWeathersensor.getHumidityS1();
+	//
+	//USART_sendBytes("Pressure: ");
+	//USART_sendInteger(nPress1);
+	//USART_sendBytes("\n\r");
+	//USART_sendBytes("Temperature: ");
+	//USART_sendInteger(nTemp1);
+	//USART_sendBytes("\n\r");
+	//USART_sendBytes("Humidity: ");
+	//USART_sendInteger(nHum1);
+	//USART_sendBytes("\n\r");
+	
+	
+	
+	//uint8_t year = 0;
+	//uint8_t month = 0;
+	//uint8_t day = 0;
+	//uint8_t hour = 0;
+	//uint8_t minute = 0;
+	//uint8_t second = 0;
+	//rtc.DS3231_getdate(year, month, day, hour, minute, second);
+	//
+	//USART_sendInteger(hour);
+	//USART_SendByte(':');
+	//USART_sendInteger(minute);
+	//USART_SendByte(':');
+	//USART_sendInteger(second);
+	//
+	//rtc.DS3231_clearalarmflag();
+	//
+	//rtc.DS3231_setalarm(1);
+	//
+	//rtc.DS3231_getalarm(hour, minute, second);
+	//
+	//USART_SendByte('\n');
+	//USART_SendByte('\r');
+	//USART_sendInteger(hour);
+	//USART_SendByte(':');
+	//USART_sendInteger(minute);
+	//USART_SendByte(':');
+	//USART_sendInteger(second);
+	//
+	//
+	//rtc.DS3231_enablealarm();
+	//
+	//USART_SendByte('\n');
+	//USART_SendByte('\r');
+	//
+	//uint8_t regE = 0;
+	//uint8_t regF = 0;
+	//
+	//rtc.GetEFRegister(regE, regF);
+	//
+	//USART_SendByte('\n');
+	//USART_SendByte('\r');
+	//USART_sendInteger(regE);
+	//
+	//USART_SendByte('\n');
+	//USART_SendByte('\r');
+	//USART_sendInteger(regF);
+	
+	//char* test = rtc.DS3231_getdatetimenow();
+	//uint8_t year = 0;
+	//uint8_t month = 0;
+	//uint8_t day = 0;
+	//rtc.DS3231_getdate(year, month, day, hour, minute, second);
+	//int messung = uSonic.getAverageDistance();
+	//int messung = 
+	//USART_sendInteger(25, '\n');
+	//USART_sendInteger(messung);
+	//USART_sendInteger(uSonic.getAverageDistance());
+	//USART_sendBytes(year);
+	
+	//char* test = {(char)rtc.DS3231_getdatetimenow()};
+	//USART_sendBytes(test);
+	
+	//rtc.DS3231_setdate(22, 5, 16, 8, 50, 0);
+	
+	// TODO Rückrechnung für ausgabe UART wegen Zeit
+	
+	
+	//EEPROM oEeprom;
+	//AF - Add testdata
+	//void AddEEPROMTestData();
 	//AF - Get alarmcycle from EEPROM
 	uint8_t alarmcycle = oEeprom.m_oParameters.nUltraSonicDelay;
 	//AF - Get lasercycle from EEPROM
@@ -281,28 +497,57 @@ int main(void)
 	rtc.DS3231_enablealarm();
 
 	/************ init Watchdog ************/
-	wdt_reset();
-	//set up WDT interrupt
-	WDTCSR = (1<<WDCE)|(1<<WDE);
-	//Start watchdog timer with 4s prescaller
-	WDTCSR = (1<<WDE)|(1<<WDP3);
-	wdt_enable(WDTO_4S);
-	wdt_reset();
+	//wdt_reset();
+	////set up WDT interrupt
+	//WDTCSR = (1<<WDCE)|(1<<WDE);
+	////Start watchdog timer with 4s prescaller
+	//WDTCSR = (1<<WDE)|(1<<WDP3);
+	//wdt_enable(WDTO_4S);
+	//wdt_reset();
 	/**************************/
 	while (1)
 	{
+		
+		//_delay_ms(500);
+		//
+		//rtc.DS3231_getdate(year, month, day, hour, minute, second);
+		//
+		//USART_sendInteger(hour);
+		//USART_SendByte(':');
+		//USART_sendInteger(minute);
+		//USART_SendByte(':');
+		//USART_sendInteger(second);
+		//
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//rtc.GetEFRegister(regE, regF);
+		//
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//USART_sendInteger(regE);
+		//
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//USART_sendInteger(regF);
+		//
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//USART_SendByte('\n');
+		//USART_SendByte('\r');
+		//
+		
+		
 	//if komm mode false
-	 
 		//AF - Start mesurement - Turn Modules on and off
-		CutoffPort |= (1 << ModuleCutoff);	//turn Module Cutoff Pin on
-		Measurementcycle(alarmcycle, counterlasercycle);
-		CutoffPort &= ~(1 << ModuleCutoff);	//turn Module Cutoff Pin off
+		//CutoffPort |= (1 << ModuleCutoff);	//turn Module Cutoff Pin on
+		//Measurementcycle(alarmcycle, counterlasercycle);
+		//CutoffPort &= ~(1 << ModuleCutoff);	//turn Module Cutoff Pin off
 		//AF Turn Watchdog off  
-		wdt_disable();
+		//wdt_disable();
 		//AF - go into sleep mode
-		sleep_mode();
+		//sleep_mode();
 		//AF - Turn Watchdog on
-		wdt_enable(WDTO_4S);
+		//wdt_enable(WDTO_4S);
 	}
 }
 
@@ -316,51 +561,57 @@ int main(void)
  */
 ISR(DS3231_ISR)
 {
-	
+	USART_Init();
+	USART_sendInteger(69);
+	rtc.DS3231_clearalarmflag();
+	rtc.DS3231_disablealarm();
 }
-
-ISR(usonicOVF_ISR)
+//
+//ISR(usonicOVF_ISR)
+//{
+	////Too far -> Increase Overflow
+	//uSonic.setOverflows(uSonic.getOverflows() + 1);
+//}
+//
+//ISR(usonicOCRA_ISR)
+//{
+	////Restarts the 16bit Timer when the TriggerPin is active
+	//if (usonicPIN & (1 << usonicTriggerPin))
+	//{
+		//usonicPrescaler0();
+		//usonicPort &= ~(1 << usonicTriggerPin);
+		//EIMSK |= (1 << usonicEchoINT);				// ext. INT 3
+	//}
+//}
+//
+//ISR(usonicEchoISR)
+//{
+	////Check if Interrupt was caused by raising edge or falling edge
+	//if (usonicPIN & (1 << usonicEchoPin))
+	//{
+		//// raising edge detection
+		//usonicTCNT = 0;
+		//usonicPrescaler1();
+	//}
+	//else
+	//{
+		//// falling edge detection
+		//usonicPrescaler0();
+		//EIMSK &= ~(1 << usonicEchoINT);
+		//cli();
+//
+		////TODO: Get the real Temperature * 10
+		//uint16_t convertedDistance = uSonic.convertDistance((uSonic.getOverflows() * uint16max) + usonicTCNT, 200);
+		//uSonic.setDistance(convertedDistance);
+		//sei();
+		//uSonic.setReady(true);
+		//usonicTCNT = 0;
+	//}
+//}
+//
+// Timer/Counter1 Compare Match C       	(TIMER1_COMPC_vect)
+ISR (TIMER1_COMPC_vect) 
 {
-	//Too far -> Increase Overflow
-	uSonic.setOverflows(uSonic.getOverflows() + 1);
-}
-
-ISR(usonicOCRA_ISR)
-{
-	//Restarts the 16bit Timer when the TriggerPin is active
-	if (usonicPIN & (1 << usonicTriggerPin))
-	{
-		usonicPrescaler0();
-		usonicPort &= ~(1 << usonicTriggerPin);
-		EIMSK |= (1 << usonicEchoINT);				// ext. INT 3
-	}
-}
-
-ISR(usonicEchoISR)
-{
-	//Check if Interrupt was caused by raising edge or falling edge
-	if (usonicPIN & (1 << usonicEchoPin))
-	{
-		// raising edge detection
-		usonicTCNT = 0;
-		usonicPrescaler1();
-	}
-	else
-	{
-		// falling edge detection
-		usonicPrescaler0();
-		EIMSK &= ~(1 << usonicEchoINT);
-		cli();
-
-		//TODO: Get the real Temperature * 10
-		uint16_t convertedDistance = uSonic.convertDistance((uSonic.getOverflows() * uint16max) + usonicTCNT, 200);
-		uSonic.setDistance(convertedDistance);
-		sei();
-		uSonic.setReady(true);
-		usonicTCNT = 0;
-	}
-}
-
-ISR (TIMER1_COMPC_vect) {
 	servo.Interrupt_Servo();
 }
+

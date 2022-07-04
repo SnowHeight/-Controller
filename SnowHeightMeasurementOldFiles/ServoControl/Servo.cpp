@@ -9,17 +9,19 @@
 
 #include "Servo.h"
 #include "../general.h"
+#include "util/delay.h"
 #include "../SDCard/sdcard.h"
+#include "../ServoControl/ServoControl.h"
 
 #include <avr/wdt.h>
 #include "../Eeprom/eeprom.h"
 #include "../DistanceLaser/DistanceLaser.h"
+#include "../usart/myUart.h"
 
 #include <avr/io.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 
 Servo servo;
 
@@ -134,6 +136,8 @@ void Servo::move(uint16_t angle1, uint16_t angle2)
 	rservo2 = _servo2;		//read value for USART
 	
 	startPWM();
+	
+	
 }
 
 
@@ -185,18 +189,15 @@ void Servo::Interrupt_Servo()
 	if (_actDuration >= _duration) 
 	{
 		_actDuration = 0;
-		if (CurrentVoltageMeassure()) 
+		if (CurrentVoltageMeassure() == true) 
 		{
-				
 			if (_drivesstate == ServoDrive::extradrive) 
 			{
-			
 				_state = ServoState::error;
 				stopPWM();
 			}
 			else 
 			{
-
 				_drivesstate = ServoDrive::extradrive;
 				rdrivestate = "extradrive";
 			}
@@ -226,7 +227,6 @@ bool Servo::isError()
 	} 
 	else
 	{
-
 		_errorlog = ErrorState::noError;
 		ErrorLog();
 
@@ -265,30 +265,39 @@ bool Servo::CurrentVoltageMeassure()
 	* read the value and commit it to the _currentS1/_currentS2 variable
 	*/
 
-	//set ADC2: mux1 is set --> delete mux0 to activate mux1
+	uartSettings settings = uartSettings();
+	
+	settings.baud = UartBaudRates::br115200;
+	
+	myUart uart = myUart(settings);
+	
+	uart.enable();
+
+	//set ADC2: mux1 is set --> delete mux0 to activate mux1 -> ADC 11
 	ADMUX &= ~((1 << MUX1) | (1 << MUX0));
 		
 	//start the conversion
 	ADCSRA |= (1<<ADSC); 
 
 	//wait for the result, than read it and set the Servo1 value
-	while(ADCSRA & (1<<ADSC));
+	while(ADCSRA & (1<<ADSC)) {}
 	_currentS1 = ADC;
 
-	//set the adc2 channel
+	//set the adc2 channel  -> ADC 9
 	ADMUX |= (1 << MUX0);
 
 	//start the conversation
 	ADCSRA |= (1<<ADSC);
 
 	//wait for the result, than read it and set the Servo2 value
-	while(ADCSRA & (1<<ADSC));
+	while(ADCSRA & (1<<ADSC)) {}
 	_currentS2 = ADC;
 
 	//USARt output values
 	rADC1 = _currentS1;
 	rADC2 = _currentS2;
 
+	uart.write((uint16_t) _currentS2, true);
 	
 	//Servo1 and Servo2 have to be under our max value, otherwise they won't move further
 	if (_currentS1 >= maxCurrentADC || _currentS2 >= maxCurrentADC)
@@ -396,7 +405,6 @@ bool Servo::BatteryOK()
  */
 void Servo::ErrorLog()
 {	
-	
 	if (_errorlog == ErrorState::errorBattery)
 	{
 		_ErrorTxt = "ERROR Battery";
@@ -434,18 +442,48 @@ bool Servo::LaserMeasure()
 
 	bool returnOK = true;
 	//SD-Card-Log-Counter
-	int _counterMeasure = 1;
+	uint16_t _counterMeasure = 1;
 
 	//initialize analog digital converter
 	servo.activateADC();
 	
 	//measure the battery capacity
 	//returns only if the battery is OK or not
-	servo.BatteryOK();
+	//servo.BatteryOK();
 
 	//starts the Servo-Movement only if the battery check is true
-	if(servo.BatteryOK())
+	//if(servo.BatteryOK())
+	
+	if(true)
 	{
+		uint16_t x = 0;
+		uint16_t y = 0;
+		
+		uartSettings settings = uartSettings();
+		
+		myUart uart = myUart(settings);
+		
+		uart.enable();
+		
+		//EEPROM oEepromm;
+		//bool bbDatastream = oEepromm.GotoFirstValue();
+//
+		//while(bbDatastream)
+		//{
+			//x = oEepromm.GetValueX();
+			//y = oEepromm.GetValueY();
+			//
+			//bbDatastream = oEepromm.GotoNextValue();
+			//
+			//uart.write((char*) "Wert x:", false);
+			//uart.write((uint16_t) x, true);
+			//
+			//uart.write((char*) "Wert y:", false);
+			//uart.write((uint16_t) y, true);
+			//
+		//}
+		
+
 
 		//test Start values
 		uint16_t servo1 = 1000;
@@ -458,8 +496,7 @@ bool Servo::LaserMeasure()
 		* y = servo 2 coodrinates
 		*
 		*/
-		uint16_t x;
-		uint16_t y;
+		
 
 
 		/***************** Servo movement *********************
@@ -475,8 +512,8 @@ bool Servo::LaserMeasure()
 		//
 		EEPROM oEeprom;
 		bool bDatastream = oEeprom.GotoFirstValue();
-
-
+		DistanceLaser distanceLaser;
+		uint16_t measuredDistance;
 		while(bDatastream)
 		{	
 			//reset the Watchdog-Timer
@@ -484,32 +521,41 @@ bool Servo::LaserMeasure()
 
 			x = oEeprom.GetValueX();
 			y = oEeprom.GetValueY();
-
+			//uart.write((char*) "Wert x:", false);
+			//uart.write((uint16_t) x, true);
+			//
+			//uart.write((char*) "Wert y:", false);
+			//uart.write((uint16_t) y, true);
 			if (x > 1500) x = 300;
 			if (y > 1500) y = 300;
 			//ToDO: Watchdog: f?r die Messungen zur?cksetzen
 
 			//Request if the servo-drive is on 
-			while(!servo.isReady());		// ! = not - if the servo is not ready
+			while(!servo.isReady()) {};		// ! = not - if the servo is not ready
 
 			//Servo 1 moves to angle x
 			//Servo 2 moves to angle y
 			servo.move(x, y);
 
-			//is the servo moving?
-			while(servo.isBusy());
+			////is the servo moving?
+			while(servo.isBusy()) 
+			{				
+				_delay_us(1);
+			}
+
+			//uart.write((char*) "Is not busy anymore", false);
 
 			/*Error Sequence
 			*if no Error occurs, we call the Laser-request function and in return we get the average measured value.
 			*After that we transfer the value to the sd-card
 			*/
+			
 			if (!servo.isError())
 			{	
-				
+				/*
 				//Turn on the Leasure-Measurement
-				//I2C-Address = 0x62
-				DistanceLaser distanceLaser;
-				uint16_t measuredDistance;
+				//I2C-Address = 0x62 */
+
 
 				//build the string. so we can commit the measure number and average laser-distance to the sd-card function
 				//memory allocate, 4 byte
@@ -519,29 +565,32 @@ bool Servo::LaserMeasure()
 				strcat(strMeasurements, (char*) measuredDistance);
 
 				//Laser-Measure-Points function
-				LaserData laserData;
-				laserData.writeData(strMeasurements);
+				//LaserData laserData;
+				//laserData.writeData(strMeasurements);
 
 				//free the allocate memory again
-				free(strMeasurements);
+				//free(strMeasurements);
 
 				//get the next x,y value for the measurement
 				measuredDistance = distanceLaser.getDistance();
-
+				
+				//uart.write((char*) "\r\nMeasuredistance:", false);
+				//uart.write((uint16_t) measuredDistance, false);
 			}
 			else
 			{
 				//exit the loop when an error occurs in the servo movement
-				returnOK = false;
-				break;
+				//returnOK = false;
+				//break;
+				return false;
 			}
-
+			
 			//gets the servo x, y angle from the EEPROM
 			bDatastream = oEeprom.GotoNextValue();
 
 			//SD-Card-Log-Timer
 			_counterMeasure++;
-
+			
 		}//end while servo-movement
 
 	}

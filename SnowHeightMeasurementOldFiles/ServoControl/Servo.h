@@ -58,10 +58,11 @@ class Servo
 			char*		_ErrorTxt;			//Error Log File message
 			uint16_t	_batterySteps;
 			bool LaserMeasure();
+			ServoDrive	_drivesstate;	
 		
 	protected:
 	private:
-		ServoDrive	_drivesstate;			//Servo drive state
+			//Servo drive state
 		//ServoState	_state;				//Servo state
 		uint8_t		_duration;				//Comparison Value from the EEPROM
 		uint8_t		_actDuration;			//Count Value
@@ -94,5 +95,6 @@ class Servo
 		bool CurrentVoltageMeassure();		//voltage measure for servo1 & servo2
 
 }; extern Servo servo; //Servo
+
 
 #endif //__SERVO_H__
