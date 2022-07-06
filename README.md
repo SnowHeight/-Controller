@@ -19,6 +19,8 @@ Zubehör:
 - Bleiakku
 - Micro-SDCard
 
+### Eine genauere Beschreibung des Projekts befindet sich im in diesem <a href="https://github.com/SnowHeight/-Controller/blob/master/Snow_Depth_Measurement.pdf">PDF</a>.
+
 
 ## ATMEAG 2560
 
@@ -93,5 +95,3 @@ Die Kommunikation findet über ein PWM-Signal mit dem Mikrocontroller statt.
 
 <a href="https://www.conrad.com/p/modelcraft-standard-servo-rs2-mgbb-analogue-servo-gear-box-material-metal-connector-system-jr-205111">Modelcraft RS2 MG/BB Datenblatt</a>,
 <a href="https://servodatabase.com/servo/modelcraft/rs-2">Modelcraft RS2 MG/BB Datenblatt 2</a>
-
-
