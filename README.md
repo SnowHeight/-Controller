@@ -95,3 +95,14 @@ Die Kommunikation findet über ein PWM-Signal mit dem Mikrocontroller statt.
 <a href="https://servodatabase.com/servo/modelcraft/rs-2">Modelcraft RS2 MG/BB Datenblatt 2</a>
 
 
+## Bereits Getestete Funktionen
+
+- [X] Usoinc
+- [X] I2C_Master
+- [X] DS3231 (Clock)
+- [X] Weathersensor
+- [X] EEPROM
+- [X] ServoControl
+- [X] Distancelaser
+- [ ] Bluetooth
+- [ ] SD-Card
