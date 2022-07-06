@@ -5,11 +5,9 @@
  *  Author: alen.baric
  */ 
 
-
 #ifndef SERVOCONTROL_H_
 #define SERVOCONTROL_H_
 #endif /*SERVOCONTROL_H_ */
-
 
 //including libraries
 #include <avr/io.h>

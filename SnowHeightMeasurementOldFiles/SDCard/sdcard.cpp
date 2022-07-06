@@ -52,7 +52,6 @@ bool DataManager::initSDCard()
 	return TRUE;
 }
 
-
 ///
 /// \brief fileExists Check if the FilePath is correct and exists
 /// \return File exists?

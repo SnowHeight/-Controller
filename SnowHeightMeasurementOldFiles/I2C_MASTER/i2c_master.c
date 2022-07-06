@@ -12,7 +12,6 @@
 #define TWBR_val ((((F_CPU / F_SCL) / Prescaler) - 16 ) / 2)
 
 
-
 void i2c_init(void)
 {
 	TWBR = (uint8_t)TWBR_val;

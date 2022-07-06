@@ -31,8 +31,6 @@ class DistanceLaser
 		/* methods */ 
 		uint8_t write_i2c(uint8_t devaddr, uint8_t regaddr, uint8_t* data, uint8_t length);		// write to I2C register
 		uint8_t read_i2c(uint8_t devaddr, uint8_t regaddr, uint8_t* data, uint8_t length);		// read from I2C register
-		
-	
 };
 
 #endif /* DISTANCELASER_H_ */

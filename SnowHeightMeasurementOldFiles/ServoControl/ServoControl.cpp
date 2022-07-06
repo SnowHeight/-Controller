@@ -15,8 +15,6 @@ ServoControl::ServoControl()
 
 }
 
-
-
 void ServoControl::setAngle(uint16_t angle1, uint16_t angle2)
 {		
 		//Wait Function

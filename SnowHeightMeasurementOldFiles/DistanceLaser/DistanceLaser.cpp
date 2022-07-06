@@ -8,7 +8,8 @@
 #include <avr\io.h>
 #include "DistanceLaser.h"
 
-extern "C" {
+extern "C" 
+{
 	#include "../I2C_MASTER/i2c_master.h"
 }
 
